@@ -1,0 +1,34 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Environment variables & secrets
+.env
+*.pem
+*.key
+
+# Data storage & indexes (preserve directories, ignore populated artifacts)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+indexes/*
+!indexes/.gitkeep
+
+# Model weights & downloads
+*.gguf
+*.bin
+*.pt
+*.safetensors
+
+# OS and IDE specific
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,44 @@
+[
+  {
+    "query_id": "q001",
+    "question": "How do I create a POST endpoint in FastAPI?",
+    "query_type": "procedural",
+    "relevant_chunk_ids": ["doc_fastapi_c000_3a8b"],
+    "notes": "Direct procedural lookup in single file"
+  },
+  {
+    "query_id": "q002",
+    "question": "What is the difference between Docker COPY and ADD?",
+    "query_type": "conceptual",
+    "relevant_chunk_ids": ["doc_docker_c000_7f1a", "doc_docker_c001_8b2c"],
+    "notes": "Requires retrieving adjacent conceptual chunks"
+  },
+  {
+    "query_id": "q003",
+    "question": "How does path parameter validation interact with request body models?",
+    "query_type": "multi_document",
+    "relevant_chunk_ids": ["doc_fastapi_c001_9d4e", "doc_pydantic_c000_12a4"],
+    "notes": "Requires cross-document context integration"
+  },
+  {
+    "query_id": "q004",
+    "question": "What is the capital city of France?",
+    "query_type": "out_of_domain",
+    "relevant_chunk_ids": [],
+    "notes": "Evaluates guardrail rejection (similarity threshold < 0.3)"
+  },
+  {
+    "query_id": "q005",
+    "question": "How do I optimize performance?",
+    "query_type": "ambiguous",
+    "relevant_chunk_ids": ["doc_docker_c003_11f2"],
+    "notes": "Vague term; tests dense embedding semantic mapping"
+  },
+  {
+    "query_id": "q006",
+    "question": "How do I configure OAuth2 JWT authentication scopes in FastAPI?",
+    "query_type": "insufficient_context",
+    "relevant_chunk_ids": [],
+    "notes": "In-domain topic but missing from indexed docs; tests 'I don't know' fallback"
+  }
+]

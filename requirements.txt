@@ -1,0 +1,39 @@
+# Core configuration
+pydantic>=2.7,<3
+pydantic-settings>=2.2,<3
+python-dotenv>=1.0.1
+
+# RAG
+langchain>=0.3,<0.4
+langchain-community>=0.3,<0.4
+langchain-core>=0.3,<0.4
+
+# Document ingestion
+pypdf>=4.2
+markdown>=3.6
+unstructured>=0.13
+
+# Embeddings / vector search
+sentence-transformers>=3
+faiss-cpu>=1.8
+numpy>=1.26,<2
+
+# ML / reranking / local LLM
+torch>=2.2
+transformers>=4.40
+huggingface-hub>=0.23
+accelerate>=0.30
+
+# API & Security
+fastapi>=0.111
+uvicorn[standard]>=0.29
+slowapi>=0.1.9
+
+# UI
+streamlit>=1.34
+
+# Testing
+pytest>=8.1
+httpx>=0.27
+
+llama-cpp-python>=0.2.75

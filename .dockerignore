@@ -1,0 +1,35 @@
+# Version control
+.git
+.gitignore
+
+# Virtual environments & IDEs
+.venv
+venv/
+env/
+.idea/
+.vscode/
+
+# Python artifacts & bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Dynamic persistent data & secrets (Mounted via volumes at runtime)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+indexes/*
+!indexes/.gitkeep
+models/*
+.env
+.env.*
+
+# Logs & temp files
+*.log
+tmp/
+temp/
