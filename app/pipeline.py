@@ -2,17 +2,18 @@ import time
 from typing import Dict, Any, Optional
 
 from app.config import settings
+from app.observability import logger
 from app.retrieval.vector_store import FAISSVectorStore
 from app.retrieval.retriever import DenseRetriever
 from app.retrieval.reranker import CrossEncoderReranker
 from app.generation.prompts import build_grounded_prompt
-from app.generation.llm import LLMProvider, MockLLMProvider, LlamaCppLLMProvider
+from app.generation.llm import LLMProvider, MockLLMProvider, LlamaCppLLMProvider, GroqLLMProvider
 
 
 class TechnicalRAGEngine:
     """
     Master RAG Orchestrator unifying Dense Retrieval, Cross-Encoder Re-Ranking,
-    Prompt Framing, and Grounded LLM Generation.
+    Prompt Framing, and Grounded LLM Generation with observability tracking.
     """
 
     def __init__(
@@ -21,7 +22,7 @@ class TechnicalRAGEngine:
         llm_provider: Optional[LLMProvider] = None,
         use_mock_llm: bool = False
     ):
-        print("[INFO] Initializing TechnicalRAGEngine pipeline...")
+        logger.info("Initializing TechnicalRAGEngine pipeline...")
 
         if vector_store is not None:
             self.vector_store = vector_store
@@ -30,7 +31,7 @@ class TechnicalRAGEngine:
             try:
                 self.vector_store.load_index()
             except Exception as e:
-                print(f"[WARNING] Could not load vector index at boot: {str(e)}")
+                logger.warning(f"Could not load vector index at boot: {str(e)}")
 
         self.retriever = DenseRetriever(
             vector_store=self.vector_store,
@@ -46,14 +47,15 @@ class TechnicalRAGEngine:
         if llm_provider:
             self.llm = llm_provider
         elif use_mock_llm:
-            print("[INFO] Using MockLLMProvider for pipeline execution.")
             self.llm = MockLLMProvider()
+        elif getattr(settings, "LLM_PROVIDER", "llama_cpp") == "groq":
+            self.llm = GroqLLMProvider()
         else:
             self.llm = LlamaCppLLMProvider()
 
-        print("[SUCCESS] TechnicalRAGEngine pipeline initialized successfully.")
+        logger.info("TechnicalRAGEngine pipeline initialized successfully.")
 
-    def ask(self, query: str) -> Dict[str, Any]:
+    def ask(self, query: str, request_id: Optional[str] = None) -> Dict[str, Any]:
         start_total = time.perf_counter()
 
         if not query or not query.strip():
@@ -62,7 +64,9 @@ class TechnicalRAGEngine:
                 "answer": "Query string cannot be empty.",
                 "sources": [],
                 "retrieved_context": [],
-                "latency_ms": {"total": 0.0}
+                "latency_ms": {"retrieval": 0.0, "reranking": 0.0, "generation": 0.0, "total": 0.0},
+                "retrieved_candidate_count": 0,
+                "selected_chunk_count": 0
             }
 
         # 1. Dense Retrieval
@@ -95,8 +99,11 @@ class TechnicalRAGEngine:
                     temperature=settings.LLM_TEMPERATURE
                 )
             except Exception as err:
-                print(f"[ERROR] LLM Generation Exception: {err}")
-                answer = f"Error during model generation: {str(err)}"
+                logger.error(
+                    f"LLM Generation Error: {str(err)}",
+                    extra={"request_id": request_id, "endpoint": "/query"}
+                )
+                answer = "An internal error occurred during model generation."
 
             if not answer or not answer.strip():
                 answer = "I couldn't find sufficient information in the indexed documentation to answer this question."
@@ -108,13 +115,30 @@ class TechnicalRAGEngine:
         for chunk_data in reranked_chunks:
             meta = chunk_data.get("metadata", {})
             sources.append({
-                "source": meta.get("source", "Unknown"),
+                "source": meta.get("file_name", "Unknown"),
                 "file_name": meta.get("file_name", "Unknown"),
                 "chunk_id": meta.get("chunk_id", "Unknown"),
                 "score": round(chunk_data.get("score", 0.0), 4)
             })
 
         time_total = (time.perf_counter() - start_total) * 1000
+
+        # Pipeline Observability Metrics Logging
+        logger.info(
+            "RAG Query Processed Successfully",
+            extra={
+                "request_id": request_id,
+                "endpoint": "/query",
+                "metrics": {
+                    "retrieved_candidates": len(candidate_docs),
+                    "selected_chunks": len(reranked_chunks),
+                    "retrieval_ms": round(time_retrieval, 2),
+                    "reranking_ms": round(time_rerank, 2),
+                    "generation_ms": round(time_gen, 2),
+                    "total_ms": round(time_total, 2)
+                }
+            }
+        )
 
         return {
             "question": query,
@@ -133,5 +157,7 @@ class TechnicalRAGEngine:
                 "reranking": round(time_rerank, 2),
                 "generation": round(time_gen, 2),
                 "total": round(time_total, 2)
-            }
+            },
+            "retrieved_candidate_count": len(candidate_docs),
+            "selected_chunk_count": len(reranked_chunks)
         }

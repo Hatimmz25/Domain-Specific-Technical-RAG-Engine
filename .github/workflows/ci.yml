@@ -1,0 +1,97 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-and-test:
+    name: Lint, Test & Validate RAG Engine
+    runs-on: ubuntu-latest
+
+    env:
+      ENVIRONMENT: testing
+      LLM_PROVIDER: mock
+      GROQ_API_KEY: "mock-key-for-ci"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest httpx
+          # Install CPU-only PyTorch first to prevent installing GPU dependencies in CI
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+
+      - name: Run Linting / Format Checks
+        run: |
+          ruff check . --ignore E501
+
+      - name: Run Unit Tests & Lightweight RAG Integration Tests
+        run: |
+          pytest -v -k "not expensive and not local_gguf"
+
+      - name: Validate API Functionality
+        run: |
+          python scripts/test_api.py
+
+  docker-build-and-healthcheck:
+    name: Build & Test Docker Container
+    runs-on: ubuntu-latest
+    needs: validate-and-test
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: rag-engine:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify Container Startup & Health Check
+        run: |
+          # Spin up backend container using lightweight mock settings
+          docker run -d \
+            --name rag_backend_ci \
+            -p 8000:8000 \
+            -e ENVIRONMENT=production \
+            -e LLM_PROVIDER=mock \
+            rag-engine:ci
+
+          # Poll health endpoint with timeout (max 30s)
+          echo "Waiting for API container startup..."
+          for i in {1..15}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/v1/health || true)
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✓ Healthcheck succeeded! HTTP $STATUS"
+              docker logs rag_backend_ci
+              docker stop rag_backend_ci
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "❌ Container health check failed or timed out!"
+          docker logs rag_backend_ci
+          docker stop rag_backend_ci
+          exit 1

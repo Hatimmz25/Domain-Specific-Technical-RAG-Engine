@@ -1,34 +1,53 @@
-# Python bytecode & cache
+# Byte-compiled / optimized / Python cache files
 __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.coverage
+htmlcov/
+.nox/
+.tox/
 
-# Virtual Environments
-.venv/
+# Virtual environments
 venv/
+.venv/
 env/
+ENV/
 
-# Environment variables & secrets
+# Environment variables & secrets (CRITICAL)
 .env
+.env.local
+.env.*.local
 *.pem
 *.key
 
-# Data storage & indexes (preserve directories, ignore populated artifacts)
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Large Model Weights (Downloaded separately)
+models/*.gguf
+models/*.bin
+models/*.pt
+models/*.safetensors
+models/*
+!models/.gitkeep
+
+# Dynamic FAISS Indexes & Mappings (Generated via scripts)
+indexes/*.faiss
+indexes/*.json
+!indexes/.gitkeep
+
+# Raw & Processed Document Artifacts (Uploaded / Dynamic)
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
-indexes/*
-!indexes/.gitkeep
 
-# Model weights & downloads
-*.gguf
-*.bin
-*.pt
-*.safetensors
-
-# OS and IDE specific
-.DS_Store
-.vscode/
-.idea/
+# Temporary Upload Files & Logs
+tmp/
+temp/
+*.log

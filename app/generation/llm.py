@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
@@ -9,6 +10,36 @@ class LLMProvider(ABC):
     @abstractmethod
     def generate(self, prompt: str, max_tokens: int = 512, temperature: float = 0.1) -> str:
         pass
+
+
+class GroqLLMProvider(LLMProvider):
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+        self.api_key = api_key or settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY", "")
+        self.model = model or settings.GROQ_MODEL
+        self._client = None
+
+    @property
+    def client(self):
+        if self._client is None:
+            if not self.api_key:
+                raise ValueError("GROQ_API_KEY environment variable is not configured for public deployment.")
+            try:
+                from groq import Groq
+                self._client = Groq(api_key=self.api_key)
+            except ImportError:
+                raise ImportError("groq package is required for Groq Cloud API inference.")
+        return self._client
+
+    def generate(self, prompt: str, max_tokens: int = 512, temperature: float = 0.1) -> str:
+        completion = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        return completion.choices[0].message.content.strip()
 
 
 class LlamaCppLLMProvider(LLMProvider):

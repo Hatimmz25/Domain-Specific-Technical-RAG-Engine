@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # Security & Public Demo Limits
     ALLOWED_CORS_ORIGINS: List[str] = Field(
-        default=["http://localhost:8501", "http://localhost:8000"],
+        default=["*"],
         description="Origins permitted for CORS requests"
     )
     MAX_FILE_SIZE_MB: int = Field(default=5, description="Maximum allowed upload size per file in MB")
@@ -60,7 +60,14 @@ class Settings(BaseSettings):
         default=5, description="Number of final context chunks supplied to LLM after re-ranking"
     )
 
-    # LLM Inference Options
+    # LLM Options
+    LLM_PROVIDER: str = Field(
+        default="groq",
+        description="LLM provider switch: 'groq' for public cloud demo, 'llama_cpp' for local dev"
+    )
+    GROQ_API_KEY: str = Field(default="", description="API Key for Groq cloud inference")
+    GROQ_MODEL: str = Field(default="llama-3.1-8b-instant", description="Groq model ID")
+    
     LLM_MODEL: str = Field(
         default="bartowski/Qwen2.5-3B-Instruct-GGUF",
         description="HuggingFace repository repo ID for Qwen2.5 GGUF weights"
