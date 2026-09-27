@@ -1,3 +1,5 @@
+Here is your clean, ready-to-copy `README.md` code. It removes the live demo section, includes your correct GitHub repository link (`[https://github.com/Hatimmz25/Domain-Specific-Technical-RAG-Engine](https://github.com/Hatimmz25/Domain-Specific-Technical-RAG-Engine)`), provides clear instructions on placing `Qwen2.5-3B-Instruct-Q8_0.gguf` inside the `models/` folder, and references your project screenshots folder.
+
 ```markdown
 # Domain-Specific Technical RAG Engine
 
@@ -7,43 +9,44 @@ A technical-documentation Q&A assistant featuring a two-stage retrieval pipeline
 ```
 
 ```
-                ┌─────────────────────────────────────────┐
-                │           User Query / Upload           │
-                └────────────────────┬────────────────────┘
-                                     │
-                                     ▼
-                ┌─────────────────────────────────────────┐
-                │  FastAPI Backend (SlowAPI Rate Limited) │
-                └────────────────────┬────────────────────┘
-                                     │
-                ┌────────────────────┴────────────────────┐
-                ▼                                         ▼
-  ┌───────────────────────────┐             ┌───────────────────────────┐
-  │  Document Ingestion       │             │  Stage 1: FAISS Retrieval │
-  │  (Semantic Sentence-      │             │  BAAI/bge-small-en-v1.5   │
-  │   Embedding Distance)     │             │  (Top N = 15 Candidates)  │
-  └───────────────────────────┘             └─────────────┬─────────────┘
-                                                          │
-                                                          ▼
-                                            ┌───────────────────────────┐
-                                            │ Stage 2: Re-Ranking       │
-                                            │ cross-encoder/ms-marco-   │
-                                            │ MiniLM-L-6-v2 (Top K = 5) │
-                                            └─────────────┬─────────────┘
-                                                          │
-                                                          ▼
-                                            ┌───────────────────────────┐
-                                            │ Grounded Context Framing  │
-                                            │ (<retrieved_context> XML) │
-                                            └─────────────┬─────────────┘
-                                                          │
-                                                          ▼
-                                            ┌───────────────────────────┐
-                                            │ Grounded LLM Generation   │
-                                            │ Local GGUF / Cloud API    │
-                                            └───────────────────────────┘
+            ┌─────────────────────────────────────────┐
+            │           User Query / Upload           │
+            └────────────────────┬────────────────────┘
+                                 │
+                                 ▼
+            ┌─────────────────────────────────────────┐
+            │  FastAPI Backend (SlowAPI Rate Limited) │
+            └────────────────────┬────────────────────┘
+                                 │
+            ┌────────────────    ┴────────────────────┐
+            ▼                                         ▼
 
 ```
+
+┌───────────────────────────┐             ┌───────────────────────────┐
+│  Document Ingestion       │             │  Stage 1: FAISS Retrieval │
+│  (Semantic Sentence-      │             │  BAAI/bge-small-en-v1.5   │
+│   Embedding Distance)     │             │  (Top N = 15 Candidates)  │
+└───────────────────────────┘             └─────────────┬─────────────┘
+│
+▼
+┌───────────────────────────┐
+│ Stage 2: Re-Ranking       │
+│ cross-encoder/ms-marco-   │
+│ MiniLM-L-6-v2 (Top K = 5) │
+└─────────────┬─────────────┘
+│
+▼
+┌───────────────────────────┐
+│ Grounded Context Framing  │
+│ (<retrieved_context> XML) │
+└─────────────┬─────────────┘
+│
+▼
+┌───────────────────────────┐
+│ Grounded LLM Generation   │
+│ Local GGUF / Cloud API    │
+└───────────────────────────┘
 
 ```
 
@@ -60,9 +63,8 @@ This guarantees that only high-confidence technical context enters the system pr
 
 ---
 
-## Live Demo
-* **Public Web Interface:** `https://your-rag-demo.render.com`
-* **Interactive API Documentation:** `https://your-rag-demo.render.com/docs`
+## Project Screenshots
+*Explore the visual walkthrough of the interface and execution breakdown views inside the [`screenshots/`](./screenshots) folder of this repository.*
 
 ---
 
@@ -71,7 +73,7 @@ This guarantees that only high-confidence technical context enters the system pr
 * **Semantic Document Chunking**: Slices technical documentation dynamically based on sentence embedding distance percentiles rather than fixed character offsets.
 * **Dual LLM Provider Architecture**:
   * **Production Public Demo**: Fast cloud inference via Groq Cloud API (`llama-3.1-8b-instant`) returning sub-second responses ($< 400\text{ ms}$).
-  * **Local Offline Development**: Self-contained CPU GGUF inference via `llama-cpp-python` (`Qwen2.5-3B-Instruct-Q8_0.gguf`).
+  * **Local Offline Development**: Self-contained CPU GGUF inference via `llama-cpp-python` (`Qwen2.5-3B-Instruct-Q8_0.gguf`)[cite: 1].
 * **Source Attribution & Citations**: Every generated response explicitly cites source file names and chunk identifiers.
 * **Optional Pipeline Breakdown View**: Collapsible Streamlit UI component displaying latency metrics and actual context chunks with relevance scores.
 * **Production Security & Guardrails**: Includes IP rate limiting (`slowapi`), filename sanitization, automatic temporary file cleanup, and XML prompt framing.
@@ -142,6 +144,8 @@ flowchart TD
 * **Streamlit**: Delivers an interactive web interface for non-technical users while providing execution breakdown views for engineers.
 * **Docker**: Packages runtime dependencies (C++ compilers, PyTorch, FAISS) into a non-root Linux container (`appuser`) to ensure deterministic deployments across local dev and cloud hosts.
 
+
+
 ---
 
 ## Evaluation Methodology & Results
@@ -205,12 +209,13 @@ Evaluated using a domain-specific dataset (`data/evaluation/eval_dataset.json`) 
 ├── data/
 │   ├── evaluation/           # Evaluation Dataset
 │   └── raw/                  # Raw Technical Documents
-├── docker-compose.yml        # Multi-Container Orchestration
-├── Dockerfile                # Multi-Stage Non-Root Build Image
+├── docker-compose.yml        # Multi-Container Orchestration[cite: 1]
+├── Dockerfile                # Multi-Stage Non-Root Build Image[cite: 1]
 ├── frontend/
-│   └── streamlit_app.py      # Streamlit Web UI
-├── main.py                   # FastAPI Application Entrypoint
-├── requirements.txt          # Python Dependency Declarations
+│   └── streamlit_app.py      # Streamlit Web UI[cite: 1]
+├── main.py                   # FastAPI Application Entrypoint[cite: 1]
+├── requirements.txt          # Python Dependency Declarations[cite: 1]
+├── screenshots/              # UI Walkthrough Images & Visual Documentation
 ├── scripts/                  # Benchmarking & Ingestion Scripts
 └── tests/                    # Pytest Suite
 
@@ -228,14 +233,15 @@ Evaluated using a domain-specific dataset (`data/evaluation/eval_dataset.json`) 
 ### Local Environment Setup
 
 1. **Clone the Repository**:
+
 ```bash
-git clone [https://github.com/your-username/technical-rag-engine.git](https://github.com/your-username/technical-rag-engine.git)
-cd technical-rag-engine
+git clone [https://github.com/Hatimmz25/Domain-Specific-Technical-RAG-Engine.git](https://github.com/Hatimmz25/Domain-Specific-Technical-RAG-Engine.git)
+cd Domain-Specific-Technical-RAG-Engine
 
 ```
 
-
 2. **Set up Virtual Environment**:
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
@@ -244,26 +250,26 @@ pip install -r requirements.txt
 
 ```
 
-
 3. **Configure Environment Variables**:
+
 ```bash
 cp .env.example .env
 
 ```
 
+4. **Download Local LLM Model Weights**:
 
-4. **Download Local LLM Model Weights (Optional for Local GGUF Mode)**:
-* Download `Qwen2.5-3B-Instruct-Q8_0.gguf` from [HuggingFace](https://huggingface.co/bartowski/Qwen2.5-3B-Instruct-GGUF?utm_source=gemini).
-* Place the `.gguf` file inside the `./models/` folder:
+* Download the `Qwen2.5-3B-Instruct-Q8_0.gguf` model file from Hugging Face (e.g., from [Qwen/Qwen2.5-3B-Instruct-GGUF](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF)).
+* Create a folder named `models` in the root of your project directory if it doesn't already exist.
+* Place the downloaded `Qwen2.5-3B-Instruct-Q8_0.gguf` file directly inside the `models` folder:
+
 ```text
 models/Qwen2.5-3B-Instruct-Q8_0.gguf
 
 ```
 
-
-
-
 5. **Start Application Services**:
+
 ```bash
 # Terminal 1: Start FastAPI Backend
 uvicorn main:app --reload --port 8000
@@ -272,8 +278,6 @@ uvicorn main:app --reload --port 8000
 streamlit run frontend/streamlit_app.py
 
 ```
-
-
 
 ---
 
@@ -287,7 +291,9 @@ docker compose up --build -d
 ```
 
 * **Frontend UI**: `http://localhost:8501`
+
 * **FastAPI Docs**: `http://localhost:8000/docs`
+
 
 ---
 
@@ -298,6 +304,7 @@ docker compose up --build -d
 Submits a technical question to the RAG engine.
 
 * **Request Body**:
+
 ```json
 {
   "question": "How do I create a POST endpoint in FastAPI?"
@@ -305,8 +312,8 @@ Submits a technical question to the RAG engine.
 
 ```
 
-
 * **Response Body**:
+
 ```json
 {
   "question": "How do I create a POST endpoint in FastAPI?",
@@ -328,8 +335,6 @@ Submits a technical question to the RAG engine.
 }
 
 ```
-
-
 
 ---
 
@@ -360,7 +365,7 @@ Submits a technical question to the RAG engine.
 ## Author
 
 * **Developer**: Hatim Mazigh
-
+* **GitHub**: [github.com/Hatimmz25](https://www.google.com/search?q=https://github.com/Hatimmz25)
 
 ```
 
