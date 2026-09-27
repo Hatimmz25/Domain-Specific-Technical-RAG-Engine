@@ -1,10 +1,11 @@
+# Place this folder next to where you run `streamlit run` (project root),
+# or copy the [theme] block into your existing config.toml.
+# The UI is designed dark-only; this stops Streamlit switching to its light
+# theme when the OS/browser is in light mode.
 [theme]
 base = "dark"
-primaryColor = "#3B82F6"
-backgroundColor = "#0E1117"
-secondaryBackgroundColor = "#161B22"
-textColor = "#E6EDF3"
+backgroundColor = "#0b0c0f"
+secondaryBackgroundColor = "#111318"
+textColor = "#f4f4f5"
+primaryColor = "#e8e9eb"
 font = "sans serif"
-
-[client]
-showErrorDetails = false

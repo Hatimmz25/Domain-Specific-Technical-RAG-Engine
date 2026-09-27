@@ -22,7 +22,7 @@ class GroqLLMProvider(LLMProvider):
     def client(self):
         if self._client is None:
             if not self.api_key:
-                raise ValueError("GROQ_API_KEY environment variable is not configured for public deployment.")
+                raise ValueError("GROQ_API_KEY environment variable is not configured.")
             try:
                 from groq import Groq
                 self._client = Groq(api_key=self.api_key)
@@ -33,9 +33,7 @@ class GroqLLMProvider(LLMProvider):
     def generate(self, prompt: str, max_tokens: int = 512, temperature: float = 0.1) -> str:
         completion = self.client.chat.completions.create(
             model=self.model,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
+            messages=[{"role": "user", "content": prompt}],
             temperature=temperature,
             max_tokens=max_tokens,
         )
@@ -58,8 +56,7 @@ class LlamaCppLLMProvider(LLMProvider):
         if self._llm is None:
             if not self.model_path.exists():
                 raise FileNotFoundError(
-                    f"Model file '{self.filename}' was not found at {self.model_path}. "
-                    f"Please verify your file placement in the models/ directory."
+                    f"Model file '{self.filename}' was not found at {self.model_path}."
                 )
 
             try:
@@ -69,14 +66,12 @@ class LlamaCppLLMProvider(LLMProvider):
                     "llama-cpp-python is required for local quantized GGUF inference."
                 )
 
-            print(f"[INFO] Loading Llama C++ GGUF Model from {self.model_path}...")
             self._llm = Llama(
                 model_path=str(self.model_path),
                 n_ctx=self.context_window,
                 n_threads=4,
                 verbose=False
             )
-            print("[SUCCESS] Loaded GGUF LLM Model successfully.")
         return self._llm
 
     def generate(self, prompt: str, max_tokens: int = 512, temperature: float = 0.1) -> str:
@@ -91,9 +86,11 @@ class LlamaCppLLMProvider(LLMProvider):
 
 
 class MockLLMProvider(LLMProvider):
+    """
+    Mock LLM provider for rapid pipeline integration testing and CI without loading heavy model weights.
+    """
     def generate(self, prompt: str, max_tokens: int = 512, temperature: float = 0.1) -> str:
         return (
-            "In LangChain, a Retriever is an interface that returns documents given an "
-            "unstructured query. It is more general than a vector store and does not need "
-            "to store documents, only return them."
+            "To create a POST endpoint in FastAPI, define a route using the `@app.post()` decorator "
+            "and specify a Pydantic model class to validate the incoming request body payload."
         )
