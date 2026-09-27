@@ -360,7 +360,7 @@ Submits a technical question to the RAG engine.
 ## Author
 
 * **Developer**: Hatim Mazigh
-* **GitHub**: [github.com/your-username](https://www.google.com/search?q=https://github.com/your-username&utm_source=gemini)
+
 
 ```
 
