@@ -1,5 +1,4 @@
 import os
-import urllib.request
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
@@ -55,16 +54,10 @@ class LlamaCppLLMProvider(LLMProvider):
     @property
     def llm(self):
         if self._llm is None:
-            # Auto-download model if missing in cloud/container environment
             if not self.model_path.exists():
-                self.model_path.parent.mkdir(parents=True, exist_ok=True)
-                print(f"Model file '{self.filename}' not found locally. Downloading from Hugging Face...")
-                model_url = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q8_0.gguf?download=true"
-                try:
-                    urllib.request.urlretrieve(model_url, str(self.model_path))
-                    print("Model download completed successfully!")
-                except Exception as e:
-                    raise RuntimeError(f"Failed to automatically download the model: {e}")
+                raise FileNotFoundError(
+                    f"Model file '{self.filename}' was not found at {self.model_path}."
+                )
 
             try:
                 from llama_cpp import Llama
